@@ -13,12 +13,13 @@
 import re
 import itertools
 import collections
+import io
 
 from docutils.parsers.rst import directives, Directive
 
 from sphinx.util.docstrings import prepare_docstring
 from types import UnionType
-from typing import _TypedDictMeta, ForwardRef, GenericAlias, _GenericAlias, io
+from typing import _TypedDictMeta, ForwardRef, GenericAlias, _GenericAlias
 from sphinxcontrib.autohttp.common import http_directive, import_object
 
 RE_PARSE_RULE = re.compile(
