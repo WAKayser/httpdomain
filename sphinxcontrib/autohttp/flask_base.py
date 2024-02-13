@@ -9,7 +9,7 @@
     :license: BSD, see LICENSE for details.
 
 """
-import io
+
 import re
 import itertools
 import collections
@@ -17,8 +17,8 @@ import collections
 from docutils.parsers.rst import directives, Directive
 
 from sphinx.util.docstrings import prepare_docstring
-from sphinx.pycode import ModuleAnalyzer
-
+from types import UnionType
+from typing import _TypedDictMeta, ForwardRef, GenericAlias, _GenericAlias, io
 from sphinxcontrib.autohttp.common import http_directive, import_object
 
 RE_PARSE_RULE = re.compile(
@@ -312,3 +312,31 @@ class AutoflaskBase(Directive):
             else:
                 for line in http_directive(method, paths, docstring):
                     yield line
+
+                if 'return' in view_func.__annotations__:
+                    return_type = view_func.__annotations__["return"]
+
+
+                    if type(return_type) == _TypedDictMeta and return_type.__annotations__:
+                        yield "  Returns:\n\n"
+                        annotations = return_type.__annotations__
+                        for key, value in annotations.items():
+                            neat_type: str
+                            if hasattr(value, __name__):
+                                neat_type = value.__name__
+                            elif isinstance(value, ForwardRef):
+                                neat_type = value.__forward_arg__
+                            elif isinstance(value, type):
+                                neat_type = value.__name__
+                            elif isinstance(value, (GenericAlias, _GenericAlias, UnionType)):
+                                neat_type = str(value)
+                            else:
+                                print(type(value))
+                                neat_type = str(value) + str(type(value))
+
+                            yield "* " + key + ": " + neat_type + "\n"
+                    else:
+                        yield "  Returns: " + getattr(return_type, "__name__", return_type) + "\n\n"
+                    yield ""
+
+
